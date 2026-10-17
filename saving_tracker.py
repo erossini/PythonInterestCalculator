@@ -2,93 +2,219 @@ from datetime import datetime
 
 ANNUAL_RATE = 8
 
-deposits = []
 
-while True:
+def get_valid_amount():
+    """Prompt the user until a valid deposit amount is entered."""
 
-    print("\nSavings Tracker")
-    print("1. Add deposit")
-    print("2. View balance")
-    print("3. View interest")
-    print("4. Exit")
+    while True:
 
-    choice = input("Choose an option: ")
+        try:
+            amount = float(
+                input("Deposit amount (£): ")
+            )
 
-    if choice == "1":
-
-        amount = float(input("Deposit amount: £"))
-
-        use_today = input(
-            "Use today's date? (y/n): "
-        ).lower()
-
-        if use_today == "y":
-
-            date = datetime.today().strftime("%Y-%m-%d")
-
-        else:
-
-            while True:
-
-                date = input(
-                    "Deposit date (YYYY-MM-DD): "
+            if amount <= 0:
+                print(
+                    "❌ Amount must be greater than zero."
                 )
+                continue
 
-                try:
+            return amount
 
-                    datetime.strptime(
-                        date,
-                        "%Y-%m-%d"
-                    )
+        except ValueError:
+            print(
+                "❌ Please enter a valid number."
+            )
 
-                    break
 
-                except ValueError:
+def get_valid_date():
+    """Prompt the user until a valid date is entered."""
 
-                    print(
-                        "Invalid date. Please use "
-                        "the format YYYY-MM-DD."
-                    )
+    use_today = input(
+        "Use today's date? (y/n): "
+    ).strip().lower()
 
-        deposits.append({
-            "amount": amount,
-            "date": date
-        })
+    if use_today == "y":
+        return datetime.today().strftime(
+            "%Y-%m-%d"
+        )
 
-        print("Deposit added successfully.")
+    while True:
 
-    elif choice == "2":
+        date_str = input(
+            "Deposit date (YYYY-MM-DD): "
+        ).strip()
 
-        balance = sum(d["amount"] for d in deposits)
-
-        print(f"Balance: £{balance:.2f}")
-
-    elif choice == "3":
-
-        total_interest = 0
-
-        for deposit in deposits:
+        try:
 
             deposit_date = datetime.strptime(
-                deposit["date"],
+                date_str,
                 "%Y-%m-%d"
             )
 
-            days = (
-                datetime.today() - deposit_date
-            ).days
+            if deposit_date > datetime.today():
 
-            interest = (
-                deposit["amount"]
-                * (ANNUAL_RATE / 100)
-                * (days / 365)
+                print(
+                    "❌ Deposit date cannot "
+                    "be in the future."
+                )
+
+                continue
+
+            return date_str
+
+        except ValueError:
+
+            print(
+                "❌ Invalid date format. "
+                "Please use YYYY-MM-DD."
             )
 
-            total_interest += interest
 
-        print(f"Estimated interest: £{total_interest:.2f}")
+def calculate_interest(
+    amount,
+    annual_rate,
+    deposit_date
+):
+    """Calculate simple interest earned to date."""
 
-    elif choice == "4":
+    deposit_datetime = datetime.strptime(
+        deposit_date,
+        "%Y-%m-%d"
+    )
 
-        print("Goodbye!")
-        break
+    days = (
+        datetime.today() - deposit_datetime
+    ).days
+
+    interest = (
+        amount
+        * (annual_rate / 100)
+        * (days / 365)
+    )
+
+    return interest
+
+
+def add_deposit(deposits):
+
+    amount = get_valid_amount()
+    date = get_valid_date()
+
+    deposits.append({
+        "amount": amount,
+        "date": date
+    })
+
+    print("\n✅ Deposit added successfully.")
+
+
+def view_balance(deposits):
+
+    balance = sum(
+        deposit["amount"]
+        for deposit in deposits
+    )
+
+    print(
+        f"\nCurrent Balance: "
+        f"£{balance:.2f}"
+    )
+
+
+def view_interest(deposits):
+
+    total_interest = 0
+
+    for deposit in deposits:
+
+        total_interest += calculate_interest(
+            deposit["amount"],
+            ANNUAL_RATE,
+            deposit["date"]
+        )
+
+    print(
+        f"\nEstimated Interest: "
+        f"£{total_interest:.2f}"
+    )
+
+
+def view_deposits(deposits):
+
+    if not deposits:
+
+        print(
+            "\nNo deposits recorded yet."
+        )
+
+        return
+
+    print("\nDeposits")
+
+    print("-" * 30)
+
+    for index, deposit in enumerate(
+        deposits,
+        start=1
+    ):
+
+        print(
+            f"{index}. "
+            f"£{deposit['amount']:.2f} "
+            f"on {deposit['date']}"
+        )
+
+
+def main():
+
+    deposits = []
+
+    while True:
+
+        print("\n=== Savings Tracker ===")
+
+        print("1. Add Deposit")
+        print("2. View Deposits")
+        print("3. View Balance")
+        print("4. View Interest")
+        print("5. Exit")
+
+        choice = input(
+            "\nChoose an option: "
+        ).strip()
+
+        if choice == "1":
+
+            add_deposit(deposits)
+
+        elif choice == "2":
+
+            view_deposits(deposits)
+
+        elif choice == "3":
+
+            view_balance(deposits)
+
+        elif choice == "4":
+
+            view_interest(deposits)
+
+        elif choice == "5":
+
+            print(
+                "\nThank you for using "
+                "Savings Tracker!"
+            )
+
+            break
+
+        else:
+
+            print(
+                "\n❌ Invalidoption."
+            )
+
+
+if __name__ == "__main__":
+    main()
