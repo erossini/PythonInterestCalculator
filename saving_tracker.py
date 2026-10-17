@@ -16,29 +16,46 @@ while True:
 
     if choice == "1":
 
-        while True:
-            try:
-                amount = float(input("Deposit amount: £"))
+        amount = float(input("Deposit amount: £"))
+
+        use_today = input(
+            "Use today's date? (y/n): "
+        ).lower()
+
+        if use_today == "y":
+
+            date = datetime.today().strftime("%Y-%m-%d")
+
+        else:
+
+            while True:
 
                 date = input(
                     "Deposit date (YYYY-MM-DD): "
                 )
 
-                datetime.strptime(date, "%Y-%m-%d")
+                try:
 
-                deposits.append({
-                    "amount": amount,
-                    "date": date
-                })
+                    datetime.strptime(
+                        date,
+                        "%Y-%m-%d"
+                    )
 
-                print("Deposit added successfully.")
-                break
+                    break
 
-            except ValueError:
-                print(
-                    "Invalid input. Please use "
-                    "YYYY-MM-DD for dates."
-                )
+                except ValueError:
+
+                    print(
+                        "Invalid date. Please use "
+                        "the format YYYY-MM-DD."
+                    )
+
+        deposits.append({
+            "amount": amount,
+            "date": date
+        })
+
+        print("Deposit added successfully.")
 
     elif choice == "2":
 
